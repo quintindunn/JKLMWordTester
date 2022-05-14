@@ -12,7 +12,7 @@ clients = []
 correct_buffer = []
 incorrect_buffer = []
 
-buffer_max_length = 100
+buffer_max_length = 50
 
 
 def message_handler(msg, **kwargs):
@@ -39,6 +39,7 @@ def message_handler(msg, **kwargs):
             print("Writing correct")
             with open("correct.json", 'w') as f:
                 json.dump(f_data, f)
+            correct_buffer.clear()
 
     elif data['type'] == "incorrectWord":
         incorrect_buffer.append(data['word'])
@@ -50,10 +51,10 @@ def message_handler(msg, **kwargs):
             for i in incorrect_buffer:
                 if i not in f_data:
                     f_data.append(i)
-# 42["startRoundNow"]
             print("Writing incorrect")
             with open("incorrect.json", 'w') as f:
                 json.dump(f_data, f)
+            incorrect_buffer.clear()
 
 
 async def websocket_handler(request):
