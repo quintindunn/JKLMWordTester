@@ -12,7 +12,7 @@ clients = []
 correct_buffer = []
 incorrect_buffer = []
 
-buffer_max_length = 5
+buffer_max_length = 20
 
 
 def message_handler(msg, **kwargs):
