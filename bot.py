@@ -124,7 +124,7 @@ class Bot:
                 continue
 
             if not msg.startswith("42["):
-                print(msg)
+                print("Invalid", msg)
                 continue
 
             msg = msg.split("42", 1)[1]
@@ -216,7 +216,10 @@ class Bot:
         return json.loads(self.word_ws.recv_msg())['word']
 
     def set_word(self, word):
-        self.game_ws.send("42" + json.dumps(['setWord', word, True]))
+        if word:
+            self.game_ws.send("42" + json.dumps(['setWord', word, True]))
+        else:
+            print("No word :(")
 
     def __str__(self):
         return f"{self.room_id=} | {self.ws_url=} | {self.token=}"
@@ -231,18 +234,18 @@ def create_bot_lobby(**kwargs):
     bot_lobbies.append(f"https://jklm.fun/{lobby_id}")
 
     threading.Thread(target=bot.join_chat, daemon=True).start()
-    time.sleep(0.5)
+    time.sleep(1)
     threading.Thread(target=bot.join_game, daemon=True).start()
 
     bot2 = Bot(room=lobby_id)
     bot2.ws_url = ws_url
 
     threading.Thread(target=bot2.join_chat, daemon=True).start()
-    time.sleep(0.5)
+    time.sleep(1)
     threading.Thread(target=bot2.join_game, daemon=True).start()
 
 
-for i in range(40):
+for i in range(80):
     try:
         create_bot_lobby(nickname="Tip")
         print(bot_lobbies)

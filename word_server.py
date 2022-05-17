@@ -5,6 +5,7 @@ from aiohttp.http_websocket import WSMessage
 import json
 import os
 
+import word_server_util
 from word_server_util import generate_word
 
 clients = []
@@ -12,9 +13,9 @@ clients = []
 correct_buffer = []
 incorrect_buffer = []
 
-buffer_max_length = 5
+buffer_max_length = 120
 
-
+start_length = len(word_server_util.wordList)
 def message_handler(msg, **kwargs):
     data = json.loads(msg.data)
     if data['type'] == "requestWord":
@@ -36,9 +37,10 @@ def message_handler(msg, **kwargs):
                 if i not in f_data:
                     f_data.append(i)
 
-            print("Writing correct")
+            print("Writing correct", "Words left:", len(word_server_util.wordList), "Tested: ", (start_length-len(word_server_util.wordList)))
             with open("correct.json", 'w') as f:
                 json.dump(f_data, f)
+            correct_buffer.clear()
 
     elif data['type'] == "incorrectWord":
         incorrect_buffer.append(data['word'])
@@ -50,10 +52,10 @@ def message_handler(msg, **kwargs):
             for i in incorrect_buffer:
                 if i not in f_data:
                     f_data.append(i)
-# 42["startRoundNow"]
-            print("Writing incorrect")
+            print("Writing incorrect", "Words left:", len(word_server_util.wordList), "Tested: ", (start_length-len(word_server_util.wordList)))
             with open("incorrect.json", 'w') as f:
                 json.dump(f_data, f)
+            incorrect_buffer.clear()
 
 
 async def websocket_handler(request):
@@ -61,7 +63,6 @@ async def websocket_handler(request):
 
     ws = web.WebSocketResponse()
     await ws.prepare(request)
-    print(f"New client, Client #{len(clients)}")
     async for msg in ws:
         msg: WSMessage = msg
         response = message_handler(msg)
