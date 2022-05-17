@@ -216,7 +216,10 @@ class Bot:
         return json.loads(self.word_ws.recv_msg())['word']
 
     def set_word(self, word):
-        self.game_ws.send("42" + json.dumps(['setWord', word, True]))
+        if word:
+            self.game_ws.send("42" + json.dumps(['setWord', word, True]))
+        else:
+            print("No word found")
 
     def __str__(self):
         return f"{self.room_id=} | {self.ws_url=} | {self.token=}"
