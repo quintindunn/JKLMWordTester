@@ -29,7 +29,8 @@ def message_handler(msg, **kwargs):
         correct_buffer.append(data['word'])
         if len(correct_buffer) >= buffer_max_length:
             if not os.path.isfile("output/correct.json"):
-                open('output/correct.json', 'w').close()
+                with open('output/incorrect.json', 'w') as f:
+                    f.write("[]")
             with open("output/correct.json", 'r') as f:
                 f_data = json.load(f)
             for i in correct_buffer:
@@ -47,7 +48,8 @@ def message_handler(msg, **kwargs):
         incorrect_buffer.append(data['word'])
         if len(incorrect_buffer) >= buffer_max_length:
             if not os.path.isfile("output/incorrect.json"):
-                open('output/incorrect.json', 'w').close()
+                with open('output/incorrect.json', 'w') as f:
+                    f.write("[]")
             with open("output/incorrect.json", 'r') as f:
                 f_data = json.load(f)
             for i in incorrect_buffer:
