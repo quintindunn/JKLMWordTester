@@ -5,7 +5,6 @@ from aiohttp.http_websocket import WSMessage
 import json
 import os
 
-import word_server_util
 from word_server_util import generate_word
 
 clients = []
@@ -13,9 +12,9 @@ clients = []
 correct_buffer = []
 incorrect_buffer = []
 
-buffer_max_length = 120
+buffer_max_length = 10
 
-start_length = len(word_server_util.wordList)
+
 def message_handler(msg, **kwargs):
     data = json.loads(msg.data)
     if data['type'] == "requestWord":
@@ -29,32 +28,36 @@ def message_handler(msg, **kwargs):
     elif data['type'] == "correctWord":
         correct_buffer.append(data['word'])
         if len(correct_buffer) >= buffer_max_length:
-            if not os.path.isfile("correct.json"):
-                open('correct.json', 'w').close()
-            with open("correct.json", 'r') as f:
+            if not os.path.isfile("output/correct.json"):
+                open('output/correct.json', 'w').close()
+            with open("output/correct.json", 'r') as f:
                 f_data = json.load(f)
             for i in correct_buffer:
                 if i not in f_data:
                     f_data.append(i)
 
-            print("Writing correct", "Words left:", len(word_server_util.wordList), "Tested: ", (start_length-len(word_server_util.wordList)))
-            with open("correct.json", 'w') as f:
+            print("Writing correct")
+            with open("output/correct.json", 'w') as f:
                 json.dump(f_data, f)
+            with open("output/correct.txt", 'w') as f:
+                f.write("\n".join(f_data))
             correct_buffer.clear()
 
     elif data['type'] == "incorrectWord":
         incorrect_buffer.append(data['word'])
         if len(incorrect_buffer) >= buffer_max_length:
-            if not os.path.isfile("incorrect.json"):
-                open('incorrect.json', 'w').close()
-            with open("incorrect.json", 'r') as f:
+            if not os.path.isfile("output/incorrect.json"):
+                open('output/incorrect.json', 'w').close()
+            with open("output/incorrect.json", 'r') as f:
                 f_data = json.load(f)
             for i in incorrect_buffer:
                 if i not in f_data:
                     f_data.append(i)
-            print("Writing incorrect", "Words left:", len(word_server_util.wordList), "Tested: ", (start_length-len(word_server_util.wordList)))
-            with open("incorrect.json", 'w') as f:
+            print("Writing incorrect")
+            with open("output/incorrect.json", 'w') as f:
                 json.dump(f_data, f)
+            with open("output/incorrect.txt", 'w') as f:
+                f.write("\n".join(f_data))
             incorrect_buffer.clear()
 
 
@@ -63,6 +66,7 @@ async def websocket_handler(request):
 
     ws = web.WebSocketResponse()
     await ws.prepare(request)
+    print(f"New client, Client #{len(clients)}")
     async for msg in ws:
         msg: WSMessage = msg
         response = message_handler(msg)
